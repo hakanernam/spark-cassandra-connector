@@ -75,6 +75,24 @@ public class CassandraJavaPairRDD<K, V> extends JavaPairRDD<K, V> {
     }
 
     /**
+     * Forces the rows within a selected Cassandra partition to be returned in ascending order
+     * (if possible).
+     */
+    public CassandraJavaPairRDD<K, V> withAscOrder() {
+        CassandraRDD<Tuple2<K, V>> newRDD = rdd().withAscOrder();
+        return new CassandraJavaPairRDD<>(newRDD, kClassTag(), vClassTag());
+    }
+
+    /**
+     * Forces the rows within a selected Cassandra partition to be returned in descending order
+     * (if possible).
+     */
+    public CassandraJavaPairRDD<K, V> withDescOrder() {
+        CassandraRDD<Tuple2<K, V>> newRDD = rdd().withAscOrder();
+        return new CassandraJavaPairRDD<>(newRDD, kClassTag(), vClassTag());
+    }
+
+    /**
      * Returns the names of columns to be selected from the table.
      */
     public String[] selectedColumnNames() {

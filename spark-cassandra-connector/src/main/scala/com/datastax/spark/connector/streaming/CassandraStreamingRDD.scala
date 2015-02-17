@@ -5,7 +5,7 @@ import com.datastax.spark.connector.{ColumnSelector, AllColumns}
 
 import scala.reflect.ClassTag
 import org.apache.spark.streaming.StreamingContext
-import com.datastax.spark.connector.rdd.{ReadConf, CassandraRDD, CqlWhereClause}
+import com.datastax.spark.connector.rdd.{ClusteringOrder, ReadConf, CassandraRDD, CqlWhereClause}
 import com.datastax.spark.connector.rdd.reader._
 
 /** RDD representing a Cassandra table for Spark Streaming.
@@ -17,8 +17,9 @@ class CassandraStreamingRDD[R] private[connector] (
     table: String,
     columns: ColumnSelector = AllColumns,
     where: CqlWhereClause = CqlWhereClause.empty,
+    clusteringOrder: Option[ClusteringOrder] = None,
     readConf: ReadConf = ReadConf())(
   implicit
     ct : ClassTag[R],
     @transient rrf: RowReaderFactory[R])
-  extends CassandraRDD[R](sctx.sparkContext, connector, keyspace, table, columns, where, readConf)
+  extends CassandraRDD[R](sctx.sparkContext, connector, keyspace, table, columns, where, clusteringOrder, readConf)

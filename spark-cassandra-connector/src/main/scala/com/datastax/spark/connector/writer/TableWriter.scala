@@ -171,7 +171,7 @@ object TableWriter {
 
     val rowWriter = implicitly[RowWriterFactory[T]].rowWriter(
       tableDef.copy(regularColumns = tableDef.regularColumns ++ writeConf.optionsAsColumns(keyspaceName, tableName)),
-      selectedColumns ++ writeConf.optionPlaceholders)
+      selectedColumns ++ writeConf.optionPlaceholders, columnNames.toAliasMap)
     new TableWriter[T](connector, tableDef, rowWriter, writeConf)
   }
 }

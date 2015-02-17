@@ -1,22 +1,20 @@
 package com.datastax.spark.connector.writer
 
-import com.datastax.driver.core.{ProtocolVersion, PreparedStatement}
 import com.datastax.spark.connector.{ColumnIndex, ColumnName, ColumnRef}
 import com.datastax.spark.connector.cql.TableDef
 import com.datastax.spark.connector.mapper.ColumnMapper
-import com.datastax.spark.connector.types.TypeConverter
 
-import scala.collection.{Map, Seq}
+import scala.collection.Seq
 import scala.collection.JavaConversions._
 
 /** A `RowWriter` suitable for saving objects mappable by a [[com.datastax.spark.connector.mapper.ColumnMapper ColumnMapper]].
   * Can save case class objects, java beans and tuples. */
-class DefaultRowWriter[T : ColumnMapper](table: TableDef, selectedColumns: Seq[String])
+class DefaultRowWriter[T : ColumnMapper](table: TableDef, selectedColumns: Seq[String], aliasToColumName: Predef.Map[String, String])
   extends RowWriter[T] {
 
   private val columnMapper = implicitly[ColumnMapper[T]]
   private val cls = columnMapper.classTag.runtimeClass.asInstanceOf[Class[T]]
-  private val columnMap = columnMapper.columnMap(table)
+  private val columnMap = columnMapper.columnMap(table, aliasToColumName)
   private val selectedColumnsSet = selectedColumns.toSet
   private val selectedColumnsIndexed = selectedColumns.toIndexedSeq
 
@@ -79,8 +77,8 @@ class DefaultRowWriter[T : ColumnMapper](table: TableDef, selectedColumns: Seq[S
 object DefaultRowWriter {
 
   def factory[T : ColumnMapper] = new RowWriterFactory[T] {
-    override def rowWriter(tableDef: TableDef, columnNames: Seq[String]) = {
-      new DefaultRowWriter[T](tableDef, columnNames)
+    override def rowWriter(tableDef: TableDef, columnNames: Seq[String], aliasToColumnName: Predef.Map[String, String]) = {
+      new DefaultRowWriter[T](tableDef, columnNames, aliasToColumnName)
     }
   }
 

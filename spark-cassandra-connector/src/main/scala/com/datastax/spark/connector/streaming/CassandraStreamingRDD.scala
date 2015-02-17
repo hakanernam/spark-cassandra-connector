@@ -17,8 +17,9 @@ class CassandraStreamingRDD[R] private[connector] (
     table: String,
     columns: ColumnSelector = AllColumns,
     where: CqlWhereClause = CqlWhereClause.empty,
+    limit: Option[Long] = None,
     readConf: ReadConf = ReadConf())(
   implicit
     ct : ClassTag[R],
     @transient rrf: RowReaderFactory[R])
-  extends CassandraRDD[R](sctx.sparkContext, connector, keyspace, table, columns, where, readConf)
+  extends CassandraRDD[R](sctx.sparkContext, connector, keyspace, table, columns, where, limit, readConf)

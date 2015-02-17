@@ -12,7 +12,7 @@ class TupleColumnMapper[T <: Product : ClassTag] extends ColumnMapper[T] {
   private def indexedColumnRefs(n: Int) =
     (0 until n).map(ColumnIndex)
 
-  override def columnMap(tableDef: TableDef): ColumnMap = {
+  override def columnMap(tableDef: TableDef, aliases: Map[String, String]): ColumnMap = {
 
     val GetterRegex = "_([0-9]+)".r
     val cls = implicitly[ClassTag[T]].runtimeClass

@@ -27,18 +27,22 @@ class JavaBeanColumnMapper[T : ClassTag](columnNameOverride: Map[String, String]
     method.getParameterTypes.size == 1 &&
     method.getReturnType == Void.TYPE
 
-  override protected def getterToColumnName(getterName: String, tableDef: TableDef) = {
+  def resolve(name: String, tableDef: TableDef, aliasToColumnName: Map[String, String]): String = {
+    columnNameOverride orElse aliasToColumnName applyOrElse(name, columnNameForProperty(_: String, tableDef))
+  }
+
+  override protected def getterToColumnName(getterName: String, tableDef: TableDef, aliasToColumnName: Map[String, String]) = {
     val p = propertyName(getterName)
-    columnNameOverride.getOrElse(p, columnNameForProperty(p, tableDef))
+    resolve(p, tableDef, aliasToColumnName)
   }
 
-  override protected def setterToColumnName(setterName: String, tableDef: TableDef) = {
+  override protected def setterToColumnName(setterName: String, tableDef: TableDef, aliasToColumnName: Map[String, String]) = {
     val p = propertyName(setterName)
-    columnNameOverride.getOrElse(p, columnNameForProperty(p, tableDef))
+    resolve(p, tableDef, aliasToColumnName)
   }
 
-  override protected def constructorParamToColumnName(paramName: String, tableDef: TableDef) = {
-    columnNameOverride.getOrElse(paramName, columnNameForProperty(paramName, tableDef))
+  override protected def constructorParamToColumnName(paramName: String, tableDef: TableDef, aliasToColumnName: Map[String, String]) = {
+    resolve(paramName, tableDef, aliasToColumnName)
   }
 
   /** Java Beans allow nulls in property values */

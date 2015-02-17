@@ -47,15 +47,19 @@ class DefaultColumnMapper[T : ClassTag](columnNameOverride: Map[String, String] 
     method.getName.endsWith(SetterSuffix)
   }
 
-  override def constructorParamToColumnName(paramName: String, tableDef: TableDef) =
-    columnNameOverride.getOrElse(paramName, columnNameForProperty(paramName, tableDef))
+  def resolve(name: String, tableDef: TableDef, aliasToColumnName: Map[String, String]): String = {
+    columnNameOverride orElse aliasToColumnName applyOrElse(name, columnNameForProperty(_: String, tableDef))
+  }
 
-  override def getterToColumnName(getterName: String, tableDef: TableDef) =
-    columnNameOverride.getOrElse(getterName, columnNameForProperty(getterName, tableDef))
+  override def constructorParamToColumnName(paramName: String, tableDef: TableDef, aliasToColumnName: Map[String, String]) =
+    resolve(paramName, tableDef, aliasToColumnName)
 
-  override def setterToColumnName(setterName: String, tableDef: TableDef) = {
+  override def getterToColumnName(getterName: String, tableDef: TableDef, aliasToColumnName: Map[String, String]) =
+    resolve(getterName, tableDef, aliasToColumnName)
+
+  override def setterToColumnName(setterName: String, tableDef: TableDef, aliasToColumnName: Map[String, String]) = {
     val propertyName = setterNameToPropertyName(setterName)
-    columnNameOverride.getOrElse(propertyName, columnNameForProperty(propertyName, tableDef))
+    resolve(propertyName, tableDef, aliasToColumnName)
   }
 
   /** Don't allow nulls in Scala - fail fast with NPE if null is tried. */

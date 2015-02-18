@@ -581,4 +581,14 @@ class CassandraRDDSpec extends FlatSpec with Matchers with SharedEmbeddedCassand
     results.head.ttlOfValue <= ttl
   }
 
+  it should "count the CassandraRDD items" in {
+    val result = sc.cassandraTable("read_test", "big_table").count()
+    result shouldBe bigTableRowCount
+  }
+
+  it should "count the CassandraRDD items with where predicate" in {
+    val result = sc.cassandraTable("read_test", "big_table").where("key=1").count()
+    result shouldBe 1
+  }
+
 }

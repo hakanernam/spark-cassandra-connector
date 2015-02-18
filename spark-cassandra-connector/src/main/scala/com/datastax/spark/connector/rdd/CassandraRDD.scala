@@ -148,7 +148,7 @@ class CassandraRDD[R] private[connector] (
   }
 
   override def count(): Long = {
-    new CassandraRDD[Long](sc, connector, keyspaceName, tableName, SomeColumns(CountColumn), where, readConf).reduce(_ + _)
+    new CassandraRDD[Long](sc, connector, keyspaceName, tableName, SomeColumns(RowCountRef), where, readConf).reduce(_ + _)
   }
 
   /** Maps each row into object of a different type using provided function taking column value(s) as argument(s).

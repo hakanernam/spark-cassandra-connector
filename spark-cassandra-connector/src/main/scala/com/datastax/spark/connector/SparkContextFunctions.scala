@@ -1,8 +1,8 @@
 package com.datastax.spark.connector
 
 import com.datastax.spark.connector.cql.CassandraConnector
-import com.datastax.spark.connector.rdd.{ReadConf, ValidRDDType, CassandraRDD}
 import com.datastax.spark.connector.rdd.reader.RowReaderFactory
+import com.datastax.spark.connector.rdd.{CassandraTableScanRDD, ReadConf, ValidRDDType}
 import org.apache.spark.SparkContext
 
 import scala.reflect.ClassTag
@@ -14,9 +14,9 @@ class SparkContextFunctions(@transient val sc: SparkContext) extends Serializabl
     * This method is made available on `SparkContext` by importing `com.datastax.spark.connector._`
     *
     * Depending on the type parameter passed to `cassandraTable`, every row is converted to one of the following:
-    *   - an [[CassandraRow]] object (default, if no type given)
-    *   - a tuple containing column values in the same order as columns selected by [[com.datastax.spark.connector.rdd.CassandraRDD#select CassandraRDD#select]]
-    *   - object of a user defined class, populated by appropriate [[com.datastax.spark.connector.mapper.ColumnMapper ColumnMapper]]
+    * - an [[CassandraRow]] object (default, if no type given)
+    * - a tuple containing column values in the same order as columns selected by [[com.datastax.spark.connector.rdd.CassandraTableScanRDD# s e l e c t C a s s a n d r a R D D # s e l e c t]]
+    * - object of a user defined class, populated by appropriate [[com.datastax.spark.connector.mapper.ColumnMapper C o l u m n M a p p e r]]
     *
     * Example:
     * {{{
@@ -42,10 +42,10 @@ class SparkContextFunctions(@transient val sc: SparkContext) extends Serializabl
     *   val rdd3 = sc.cassandraTable[WordCount]("test", "words")
     *   rdd3.first.word  // foo
     *   rdd3.first.count // 20
-    * }}}*/
+    * }}} */
   def cassandraTable[T](keyspace: String, table: String)
                        (implicit connector: CassandraConnector = CassandraConnector(sc.getConf),
                         ct: ClassTag[T], rrf: RowReaderFactory[T],
                         ev: ValidRDDType[T]) =
-    new CassandraRDD[T](sc, connector, keyspace, table, readConf = ReadConf.fromSparkConf(sc.getConf))
+    new CassandraTableScanRDD[T](sc, connector, keyspace, table, readConf = ReadConf.fromSparkConf(sc.getConf))
 }

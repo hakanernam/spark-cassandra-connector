@@ -3,7 +3,7 @@ package com.datastax.spark.connector.japi.rdd;
 import com.datastax.spark.connector.NamedColumnRef;
 import com.datastax.spark.connector.cql.CassandraConnector;
 import com.datastax.spark.connector.japi.CassandraJavaUtil;
-import com.datastax.spark.connector.rdd.CassandraTableScanRDD;
+import com.datastax.spark.connector.rdd.CassandraRDD;
 import com.datastax.spark.connector.rdd.ReadConf;
 import com.datastax.spark.connector.util.JavaApiHelper;
 import org.apache.spark.api.java.JavaRDD;
@@ -13,7 +13,7 @@ import static com.datastax.spark.connector.util.JavaApiHelper.getClassTag;
 import static com.datastax.spark.connector.util.JavaApiHelper.toScalaSeq;
 
 /**
- * A Java API wrapper over {@link com.datastax.spark.connector.rdd.CassandraTableScanRDD} to provide Spark Cassandra Connector
+ * A Java API wrapper over {@link com.datastax.spark.connector.rdd.CassandraRDD} to provide Spark Cassandra Connector
  * functionality in Java.
  * <p/>
  * <p>The wrapper can be obtained by one of the methods of {@link com.datastax.spark.connector.japi.SparkContextJavaFunctions}
@@ -23,20 +23,20 @@ import static com.datastax.spark.connector.util.JavaApiHelper.toScalaSeq;
 public class CassandraJavaRDD<R> extends JavaRDD<R>
 {
 
-    public CassandraJavaRDD(CassandraTableScanRDD<R> rdd, Class<R> clazz)
+    public CassandraJavaRDD(CassandraRDD<R> rdd, Class<R> clazz)
     {
         super(rdd, getClassTag(clazz));
     }
 
-    public CassandraJavaRDD(CassandraTableScanRDD<R> rdd, ClassTag<R> classTag)
+    public CassandraJavaRDD(CassandraRDD<R> rdd, ClassTag<R> classTag)
     {
         super(rdd, classTag);
     }
 
     @Override
-    public CassandraTableScanRDD<R> rdd()
+    public CassandraRDD<R> rdd()
     {
-        return (CassandraTableScanRDD<R>) super.rdd();
+        return (CassandraRDD<R>) super.rdd();
     }
 
     /**
@@ -50,7 +50,7 @@ public class CassandraJavaRDD<R> extends JavaRDD<R>
     {
         // explicit type argument is intentional and required here
         //noinspection RedundantTypeArguments
-        CassandraTableScanRDD<R> newRDD = (CassandraTableScanRDD<R>) rdd()
+        CassandraRDD<R> newRDD = (CassandraRDD<R>) rdd()
                 .select(JavaApiHelper.<NamedColumnRef>toScalaSeq(CassandraJavaUtil.convert(columnNames)));
         return new CassandraJavaRDD<>(newRDD, classTag());
     }
@@ -66,7 +66,7 @@ public class CassandraJavaRDD<R> extends JavaRDD<R>
     {
         // explicit type argument is intentional and required here
         //noinspection RedundantTypeArguments
-        CassandraTableScanRDD<R> newRDD = (CassandraTableScanRDD<R>) rdd()
+        CassandraRDD<R> newRDD = (CassandraRDD<R>) rdd()
                 .select(JavaApiHelper.<NamedColumnRef>toScalaSeq(selectionColumns));
         return new CassandraJavaRDD<>(newRDD, classTag());
     }
@@ -80,7 +80,7 @@ public class CassandraJavaRDD<R> extends JavaRDD<R>
      */
     public CassandraJavaRDD<R> where(String cqlWhereClause, Object... args)
     {
-        CassandraTableScanRDD<R> newRDD = (CassandraTableScanRDD<R>) rdd().where(cqlWhereClause, toScalaSeq(args));
+        CassandraRDD<R> newRDD = (CassandraRDD<R>) rdd().where(cqlWhereClause, toScalaSeq(args));
         return new CassandraJavaRDD<>(newRDD, classTag());
     }
 
@@ -100,7 +100,7 @@ public class CassandraJavaRDD<R> extends JavaRDD<R>
      */
     public CassandraJavaRDD<R> withConnector(CassandraConnector connector)
     {
-        CassandraTableScanRDD<R> newRDD = (CassandraTableScanRDD<R>) rdd().withConnector(connector);
+        CassandraRDD<R> newRDD = (CassandraRDD<R>) rdd().withConnector(connector);
         return new CassandraJavaRDD<>(newRDD, classTag());
     }
 
@@ -109,7 +109,7 @@ public class CassandraJavaRDD<R> extends JavaRDD<R>
      */
     public CassandraJavaRDD<R> withReadConf(ReadConf config)
     {
-        CassandraTableScanRDD<R> newRDD = (CassandraTableScanRDD<R>) rdd().withReadConf(config);
+        CassandraRDD<R> newRDD = (CassandraRDD<R>) rdd().withReadConf(config);
         return new CassandraJavaRDD<>(newRDD, classTag());
     }
 }

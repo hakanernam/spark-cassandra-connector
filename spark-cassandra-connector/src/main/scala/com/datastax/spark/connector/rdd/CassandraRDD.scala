@@ -2,6 +2,8 @@ package com.datastax.spark.connector.rdd
 
 import com.datastax.spark.connector._
 import com.datastax.spark.connector.cql._
+import com.datastax.spark.connector.rdd.reader._
+import com.datastax.spark.connector.types.TypeConverter
 import org.apache.spark.rdd.RDD
 import org.apache.spark.{Dependency, SparkContext}
 
@@ -16,16 +18,102 @@ abstract class CassandraRDD[R](_sc: SparkContext, dep: Seq[Dependency[_]])(impli
   }
 
   protected def columnNames: ColumnSelector
-
   protected def where: CqlWhereClause
-
   protected def readConf: ReadConf
-
   protected def connector: CassandraConnector
+
 
   protected def copy(columnNames: ColumnSelector = columnNames,
                      where: CqlWhereClause = where,
                      readConf: ReadConf = readConf, connector: CassandraConnector = connector): CassandraRDD[R]
+
+  //convertTo must be implmented for classes which wish to support `.as`
+  protected def convertTo[B](implicit ct: ClassTag[B], rrf: RowReaderFactory[B]): CassandraRDD[B] =
+    throw new NotImplementedError(s"convertTo not implemented for this class")
+
+  /** Maps each row into object of a different type using provided function taking column value(s) as argument(s).
+    * Can be used to convert each row to a tuple or a case class object:
+    * {{{
+    * sc.cassandraTable("ks", "table").select("column1").as((s: String) => s)                 // yields CassandraRDD[String]
+    * sc.cassandraTable("ks", "table").select("column1", "column2").as((_: String, _: Long))  // yields CassandraRDD[(String, Long)]
+    *
+    * case class MyRow(key: String, value: Long)
+    * sc.cassandraTable("ks", "table").select("column1", "column2").as(MyRow)                 // yields CassandraRDD[MyRow]
+    * }}} */
+  def as[B: ClassTag, A0: TypeConverter](f: A0 => B): CassandraRDD[B] = {
+    implicit val ft = new FunctionBasedRowReader1(f)
+    convertTo[B]
+  }
+
+  def as[B: ClassTag, A0: TypeConverter, A1: TypeConverter](f: (A0, A1) => B) = {
+    implicit val ft = new FunctionBasedRowReader2(f)
+    convertTo[B]
+  }
+
+  def as[B: ClassTag, A0: TypeConverter, A1: TypeConverter, A2: TypeConverter](f: (A0, A1, A2) => B) = {
+    implicit val ft = new FunctionBasedRowReader3(f)
+    convertTo[B]
+  }
+
+  def as[B: ClassTag, A0: TypeConverter, A1: TypeConverter, A2: TypeConverter,
+  A3: TypeConverter](f: (A0, A1, A2, A3) => B) = {
+    implicit val ft = new FunctionBasedRowReader4(f)
+    convertTo[B]
+  }
+
+  def as[B: ClassTag, A0: TypeConverter, A1: TypeConverter, A2: TypeConverter, A3: TypeConverter,
+  A4: TypeConverter](f: (A0, A1, A2, A3, A4) => B) = {
+    implicit val ft = new FunctionBasedRowReader5(f)
+    convertTo[B]
+  }
+
+  def as[B: ClassTag, A0: TypeConverter, A1: TypeConverter, A2: TypeConverter, A3: TypeConverter,
+  A4: TypeConverter, A5: TypeConverter](f: (A0, A1, A2, A3, A4, A5) => B) = {
+    implicit val ft = new FunctionBasedRowReader6(f)
+    convertTo[B]
+  }
+
+  def as[B: ClassTag, A0: TypeConverter, A1: TypeConverter, A2: TypeConverter, A3: TypeConverter,
+  A4: TypeConverter, A5: TypeConverter, A6: TypeConverter](f: (A0, A1, A2, A3, A4, A5, A6) => B) = {
+    implicit val ft = new FunctionBasedRowReader7(f)
+    convertTo[B]
+  }
+
+  def as[B: ClassTag, A0: TypeConverter, A1: TypeConverter, A2: TypeConverter, A3: TypeConverter,
+  A4: TypeConverter, A5: TypeConverter, A6: TypeConverter,
+  A7: TypeConverter](f: (A0, A1, A2, A3, A4, A5, A6, A7) => B) = {
+    implicit val ft = new FunctionBasedRowReader8(f)
+    convertTo[B]
+  }
+
+  def as[B: ClassTag, A0: TypeConverter, A1: TypeConverter, A2: TypeConverter, A3: TypeConverter,
+  A4: TypeConverter, A5: TypeConverter, A6: TypeConverter, A7: TypeConverter,
+  A8: TypeConverter](f: (A0, A1, A2, A3, A4, A5, A6, A7, A8) => B) = {
+    implicit val ft = new FunctionBasedRowReader9(f)
+    convertTo[B]
+  }
+
+  def as[B: ClassTag, A0: TypeConverter, A1: TypeConverter, A2: TypeConverter, A3: TypeConverter,
+  A4: TypeConverter, A5: TypeConverter, A6: TypeConverter, A7: TypeConverter,
+  A8: TypeConverter, A9: TypeConverter](f: (A0, A1, A2, A3, A4, A5, A6, A7, A8, A9) => B) = {
+    implicit val ft = new FunctionBasedRowReader10(f)
+    convertTo[B]
+  }
+
+  def as[B: ClassTag, A0: TypeConverter, A1: TypeConverter, A2: TypeConverter, A3: TypeConverter,
+  A4: TypeConverter, A5: TypeConverter, A6: TypeConverter, A7: TypeConverter, A8: TypeConverter,
+  A9: TypeConverter, A10: TypeConverter](f: (A0, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10) => B) = {
+    implicit val ft = new FunctionBasedRowReader11(f)
+    convertTo[B]
+  }
+
+  def as[B: ClassTag, A0: TypeConverter, A1: TypeConverter, A2: TypeConverter, A3: TypeConverter,
+  A4: TypeConverter, A5: TypeConverter, A6: TypeConverter, A7: TypeConverter, A8: TypeConverter,
+  A9: TypeConverter, A10: TypeConverter, A11: TypeConverter](
+                                                              f: (A0, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11) => B) = {
+    implicit val ft = new FunctionBasedRowReader12(f)
+    convertTo[B]
+  }
 
   /** Returns a copy of this Cassandra RDD with specified connector */
   def withConnector(connector: CassandraConnector): CassandraRDD[R] = {
@@ -56,7 +144,7 @@ abstract class CassandraRDD[R](_sc: SparkContext, dep: Seq[Dependency[_]])(impli
     copy(columnNames = SomeColumns(narrowColumnSelection(columns): _*))
   }
 
-  def narrowColumnSelection(columns: Seq[NamedColumnRef]): Seq[NamedColumnRef] //TODO extract this out to READER Trait
+  protected def narrowColumnSelection(columns: Seq[NamedColumnRef]): Seq[NamedColumnRef]
 }
 
 
